@@ -1,16 +1,20 @@
 import React, {FC} from 'react';
-import {Image, StyleSheet, Text, View} from "react-native";
+import {Image, StyleSheet, Text, View, ActivityIndicator } from "react-native";
+import { useSelector } from 'react-redux';
 
 import {Flexs, Titles} from "../../styles";
 import {wordFormatted} from "../../core/helpers";
+import { TAppState } from '../../core/store';
+import { TWeather } from '../../core/types';
 
 interface IProps {
-  weather: any;
+  weather: TWeather | null;
 }
 
 type TImages = { Clouds: { uri: string }, Clear: { uri: string }, Tornado: { uri: string }, Rain: { uri: string } };
 
 const Weather:FC<IProps> = ({ weather }) => {
+  const isLoading = useSelector((state: TAppState) => state.weather.isLoading);
   const images: any = {
     "Clouds": {
       uri: require("../../assets/images/cloud.png")
@@ -25,6 +29,16 @@ const Weather:FC<IProps> = ({ weather }) => {
       uri: require("../../assets/images/rain.png")
     }
   }
+
+  // console.log(weather.rain)
+
+  if (!weather) {
+    return <View style={styles.tempView}>
+      <Text style={Titles.city}>Please, choose city</Text>
+      {isLoading && <ActivityIndicator color="#0000ff" />}
+    </View>
+  }
+
 
   return (
     <>

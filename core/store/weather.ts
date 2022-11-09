@@ -1,7 +1,18 @@
 import {createSlice} from "@reduxjs/toolkit";
+import {TMode, TWeather } from "../types";
 
-const initialState = {
-  weather: null
+export interface TInitialState {
+  weather: TWeather | null;
+  isLoading: boolean;
+  mode: TMode;
+  city: string;
+}
+
+const initialState: TInitialState = {
+  weather: null,
+  isLoading: false,
+  mode: "celsius",
+  city: "",
 }
 
 const WeatherSlice = createSlice({
@@ -10,10 +21,19 @@ const WeatherSlice = createSlice({
   reducers: {
     setWeather: (state, action) => {
       state.weather = action.payload;
+    },
+    setIsWeatherLoading: (state, action) => {
+      state.isLoading = action.payload;
+    },
+    setMode: (state, action) => {
+      state.mode = action.payload;
+    },
+    setCity: (state, action) => {
+      state.city = action.payload;
     }
   }
 })
 
-export const { setWeather } = WeatherSlice.actions;
+export const { setWeather, setIsWeatherLoading, setMode, setCity } = WeatherSlice.actions;
 
 export default WeatherSlice.reducer

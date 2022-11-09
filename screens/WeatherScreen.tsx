@@ -3,28 +3,23 @@ import {useDispatch, useSelector} from "react-redux";
 import * as Location from 'expo-location';
 
 import Weather from "../components/Weather";
+import Form from '../components/Form';
 
+import {setMode} from "../core/store/weather";
 import {TAppDispatch, TAppState} from "../core/store";
 import {getWeatherByCoords, getWeatherByName} from "../core/actions";
 import {Containers, Flexs, Titles} from "../styles";
 import {useState} from "react";
 import {useForm, Controller} from "react-hook-form";
+import { TMode } from '../core/types';
+import { useAppSelector } from '../core/hooks';
 
 type TFormValues = { city: string };
 
 export default function WeatherScreen() {
-  const weather: any = useSelector((state: TAppState) => state.weather.weather);
+  const { weather, city, mode } = useAppSelector((state: TAppState) => state.weather)
   const dispatch = useDispatch<TAppDispatch>();
-  const [mode, setMode] = useState<'celsius' | 'fahrenheit'>('celsius');
   const [isShowForm, setIsShowForm] = useState<boolean>(false);
-
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-    clearErrors,
-    reset,
-  } = useForm<TFormValues>({ mode: 'onSubmit', reValidateMode: "onSubmit" });
 
   const handleGetMyLocation = async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
@@ -34,16 +29,14 @@ export default function WeatherScreen() {
     }
 
     const location = await Location.getCurrentPositionAsync({});
-    console.log("location", location.coords.latitude, location.coords.longitude);
+    console.log("location", location);
     dispatch(getWeatherByCoords({ lat: location.coords.latitude, lon: location.coords.longitude }));
   }
 
-  const handleGetWeather = (values: TFormValues) => {
-    dispatch(getWeatherByName(values.city));
-    setIsShowForm(false);
-    reset();
+  const handleChangeMode = (mode: TMode) => {
+    dispatch(setMode(mode));
+    dispatch(getWeatherByName(city));
   }
-
 
   const isHaveWeather = Boolean(weather);
   const isCelsiusMode = mode === "celsius";
@@ -51,53 +44,20 @@ export default function WeatherScreen() {
   return (
     <View style={Containers.default}>
       {isShowForm ? (
-        <>
-          <Controller
-            name={"city"}
-            control={control}
-            rules={{
-              required: {
-                value: true,
-                message: "Введите название города"
-              },
-              onChange: () => clearErrors("city"),
-            }}
-            render={({field: { value, onChange }}) => (
-              <View>
-                <TextInput
-                  value={value}
-                  onChangeText={onChange}
-                  style={styles.input}
-                  placeholder={'Введите название города'}
-                  placeholderTextColor={'#D7D7D7'}
-                  returnKeyType={"done"}
-                />
-                <TouchableOpacity onPress={handleSubmit(handleGetWeather)} style={styles.submitBtn}>
-                  <Text style={styles.submitBtnTitle}>OK</Text>
-                </TouchableOpacity>
-                {Boolean(errors?.city?.message) && (
-                  <Text style={styles.errorMessage}>{errors?.city?.message}</Text>
-                )}
-                <TouchableOpacity onPress={() => setIsShowForm(false)}>
-                  <Text style={[Titles.description, { textAlign: "center", marginVertical: 12 }]}>Вернуться</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-          />
-        </>
+        <Form handleCloseModal={() => setIsShowForm(false)} />
       ) : (
         <>
           <View style={{ ...Flexs.row, alignItems: "center" }}>
-            {isHaveWeather && <Text style={Titles.city}>{weather.name}</Text>}
+            {isHaveWeather && <Text style={Titles.city}>{weather?.name}</Text>}
             <View style={styles.mode}>
               <TouchableOpacity
-                onPress={() => setMode("celsius")}
+                onPress={() => handleChangeMode("celsius")}
                 style={[styles.btn, isCelsiusMode ? styles.activeModeBtn : styles.inactiveModeBtn ]}
               >
                 <Text style={isCelsiusMode ? styles.activeModeTitle : styles.inactiveModeTitle}>C</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={() => setMode("fahrenheit")}
+                onPress={() => handleChangeMode("fahrenheit")}
                 style={[styles.btn, !isCelsiusMode ? styles.activeModeBtn : styles.inactiveModeBtn ]}
               >
                 <Text style={!isCelsiusMode ? styles.activeModeTitle : styles.inactiveModeTitle}>F</Text>
@@ -112,7 +72,7 @@ export default function WeatherScreen() {
               <Text style={Titles.description}>Моё местоположение</Text>
             </TouchableOpacity>
           </View>
-          {isHaveWeather && <Weather weather={weather} />}
+          <Weather weather={weather} />
         </>
       )}
     </View>
@@ -123,26 +83,6 @@ const styles = StyleSheet.create({
   nav: {
     ...Flexs.row,
     marginVertical: 20
-  },
-  submitBtn: {
-    position: "absolute",
-    right: 20,
-    top: 16
-  },
-  submitBtnTitle: {
-    color: "#1086FF",
-    fontSize: 15
-  },
-  input: {
-    paddingLeft: 12,
-    backgroundColor: "#fff",
-    height: 52,
-    borderRadius: 4
-  },
-  errorMessage: {
-    marginVertical: 8,
-    color: "red",
-    textAlign: "center"
   },
   mode: {
     flexDirection: "row",
