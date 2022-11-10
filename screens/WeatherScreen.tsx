@@ -1,5 +1,5 @@
-import {StyleSheet, TouchableOpacity, Text, View, TextInput} from 'react-native';
-import {useDispatch, useSelector} from "react-redux";
+import {StyleSheet, TouchableOpacity, Text, View} from 'react-native';
+import {useDispatch} from "react-redux";
 import * as Location from 'expo-location';
 
 import Weather from "../components/Weather";
@@ -10,15 +10,12 @@ import {TAppDispatch, TAppState} from "../core/store";
 import {getWeatherByCoords, getWeatherByName} from "../core/actions";
 import {Containers, Flexs, Titles} from "../styles";
 import {useState} from "react";
-import {useForm, Controller} from "react-hook-form";
 import { TMode } from '../core/types';
 import { useAppSelector } from '../core/hooks';
 
-type TFormValues = { city: string };
-
 export default function WeatherScreen() {
-  const { weather, city, mode } = useAppSelector((state: TAppState) => state.weather)
   const dispatch = useDispatch<TAppDispatch>();
+  const { weather, city, mode } = useAppSelector((state: TAppState) => state.weather)
   const [isShowForm, setIsShowForm] = useState<boolean>(false);
 
   const handleGetMyLocation = async () => {
@@ -29,7 +26,6 @@ export default function WeatherScreen() {
     }
 
     const location = await Location.getCurrentPositionAsync({});
-    console.log("location", location);
     dispatch(getWeatherByCoords({ lat: location.coords.latitude, lon: location.coords.longitude }));
   }
 

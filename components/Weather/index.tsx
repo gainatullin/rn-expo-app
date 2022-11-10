@@ -30,8 +30,6 @@ const Weather:FC<IProps> = ({ weather }) => {
     }
   }
 
-  // console.log(weather.rain)
-
   if (!weather) {
     return <View style={styles.tempView}>
       <Text style={Titles.city}>Please, choose city</Text>
