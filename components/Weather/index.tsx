@@ -46,6 +46,7 @@ const Weather:FC<IProps> = ({ weather }) => {
         <View style={{ flexDirection: "row", alignItems: "center"}}>
           <Image source={images[weather.weather[0].main].uri} style={styles.icon} />
           <Text style={Titles.temp}>{Math.ceil(weather?.main?.temp)}</Text>
+          <View style={styles.degree} />
         </View>
         <Text style={Titles.white}>{wordFormatted(weather.weather[0].description)}</Text>
       </View>
@@ -90,6 +91,16 @@ const styles = StyleSheet.create({
   icon: {
     width: 120,
     height: 120
+  },
+  degree: {
+    position: "absolute",
+    top: 28,
+    right: -32,
+    borderRadius: 50,
+    borderColor: "#fff",
+    borderWidth: 2,
+    width: 32,
+    height: 32
   },
   flex: {
     flex: 1
