@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, {FC, useState} from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import {TextInput, TouchableOpacity, View, StyleSheet, Text } from 'react-native';
 import { useDispatch } from 'react-redux';
@@ -15,6 +15,7 @@ interface IProps {
 }
 
 const Form:FC<IProps> = ({ handleCloseModal }) => {
+  const [errorMessage, setErrorMessage] = useState<string>('')
   const dispatch = useDispatch<TAppDispatch>();
 
   const {
@@ -25,10 +26,15 @@ const Form:FC<IProps> = ({ handleCloseModal }) => {
     reset,
   } = useForm<TFormValues>({ mode: 'onSubmit', reValidateMode: "onSubmit" });
 
-  const handleGetWeather = (values: TFormValues) => {
-    dispatch(getWeatherByName(values.city));
-    dispatch(setCity(values.city))
-    handleCloseModal();
+  const handleGetWeather = async (values: TFormValues) => {
+    const cityInfo: any = await dispatch(getWeatherByName(values.city));
+    if (cityInfo?.data) {
+      dispatch(setCity(values.city))
+      handleCloseModal();
+      return;
+    }
+
+    setErrorMessage("City is not found");
     reset();
   }
 
@@ -42,7 +48,10 @@ const Form:FC<IProps> = ({ handleCloseModal }) => {
             value: true,
             message: "Введите название города"
           },
-          onChange: () => clearErrors("city"),
+          onChange: () => {
+            errors?.city && clearErrors("city");
+            errorMessage.length && setErrorMessage("")
+          },
         }}
         render={({field: { value, onChange }}) => (
           <View>
@@ -59,6 +68,9 @@ const Form:FC<IProps> = ({ handleCloseModal }) => {
             </TouchableOpacity>
             {Boolean(errors?.city?.message) && (
               <Text style={styles.errorMessage}>{errors?.city?.message}</Text>
+            )}
+            {Boolean(errorMessage) && (
+              <Text style={styles.errorMessage}>{errorMessage}</Text>
             )}
             <TouchableOpacity onPress={handleCloseModal}>
               <Text style={[Titles.description, { textAlign: "center", marginVertical: 12 }]}>Вернуться</Text>

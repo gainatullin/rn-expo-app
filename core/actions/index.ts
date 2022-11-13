@@ -7,7 +7,10 @@ export const getWeatherByName = (cityName: string) => async (dispatch: TAppDispa
   try {
     dispatch(setIsWeatherLoading(true));
     const cityInfo = await axios.get(`https://api.openweathermap.org/geo/1.0/direct?q=${cityName}&appid=${API_KEY}`);
-    dispatch(getWeatherByCoords({lat: cityInfo.data[0].lat, lon: cityInfo.data[0].lon}))
+    if (cityInfo.data.length) {
+      dispatch(getWeatherByCoords({lat: cityInfo.data[0].lat, lon: cityInfo.data[0].lon}))
+      return cityInfo;
+    }
   } catch (error) {
     dispatch(setIsWeatherLoading(false));
     throw error;
